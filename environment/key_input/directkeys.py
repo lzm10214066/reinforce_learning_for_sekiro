@@ -10,27 +10,34 @@ import time
 
 SendInput = ctypes.windll.user32.SendInput
 
+ESC = 0x01  # stop
 
-W = 0x11
-A = 0x1E
-S = 0x1F
-D = 0x20
+# move
+W = 0x11  # forward
+A = 0x1E  # left
+S = 0x1F  # back
+D = 0x20  # right
 
-M = 0x32
-J = 0x24
-K = 0x25
+# action
+J = 0x24  # attack
+K = 0x25  # block
+L = 0x26  # dodge
+I = 0x17  # jump
+
+# backup
 LSHIFT = 0x2A
-R = 0x13#用R代替识破
+R = 0x13
 V = 0x2F
-
 Q = 0x10
-I = 0x17
+M = 0x32
 O = 0x18
 P = 0x19
 C = 0x2E
 
 # C struct redefinitions 
 PUL = ctypes.POINTER(ctypes.c_ulong)
+
+
 class KeyBdInput(ctypes.Structure):
     _fields_ = [("wVk", ctypes.c_ushort),
                 ("wScan", ctypes.c_ushort),
@@ -38,114 +45,104 @@ class KeyBdInput(ctypes.Structure):
                 ("time", ctypes.c_ulong),
                 ("dwExtraInfo", PUL)]
 
+
 class HardwareInput(ctypes.Structure):
     _fields_ = [("uMsg", ctypes.c_ulong),
                 ("wParamL", ctypes.c_short),
                 ("wParamH", ctypes.c_ushort)]
+
 
 class MouseInput(ctypes.Structure):
     _fields_ = [("dx", ctypes.c_long),
                 ("dy", ctypes.c_long),
                 ("mouseData", ctypes.c_ulong),
                 ("dwFlags", ctypes.c_ulong),
-                ("time",ctypes.c_ulong),
+                ("time", ctypes.c_ulong),
                 ("dwExtraInfo", PUL)]
+
 
 class Input_I(ctypes.Union):
     _fields_ = [("ki", KeyBdInput),
-                 ("mi", MouseInput),
-                 ("hi", HardwareInput)]
+                ("mi", MouseInput),
+                ("hi", HardwareInput)]
+
 
 class Input(ctypes.Structure):
     _fields_ = [("type", ctypes.c_ulong),
                 ("ii", Input_I)]
 
-# Actuals Functions
 
+# Actuals Functions
 def PressKey(hexKeyCode):
     extra = ctypes.c_ulong(0)
     ii_ = Input_I()
-    ii_.ki = KeyBdInput( 0, hexKeyCode, 0x0008, 0, ctypes.pointer(extra) )
-    x = Input( ctypes.c_ulong(1), ii_ )
+    ii_.ki = KeyBdInput(0, hexKeyCode, 0x0008, 0, ctypes.pointer(extra))
+    x = Input(ctypes.c_ulong(1), ii_)
     ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
+
 
 def ReleaseKey(hexKeyCode):
     extra = ctypes.c_ulong(0)
     ii_ = Input_I()
-    ii_.ki = KeyBdInput( 0, hexKeyCode, 0x0008 | 0x0002, 0, ctypes.pointer(extra) )
-    x = Input( ctypes.c_ulong(1), ii_ )
+    ii_.ki = KeyBdInput(0, hexKeyCode, 0x0008 | 0x0002, 0, ctypes.pointer(extra))
+    x = Input(ctypes.c_ulong(1), ii_)
     ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
-    
-    
-def define():
-    PressKey(M)
-    time.sleep(0.05)
-    ReleaseKey(M)
-    #time.sleep(0.1)
-    
-def attack():
-    PressKey(J)
-    time.sleep(0.05)
-    ReleaseKey(J)
-    #time.sleep(0.1)
-    
+
+
+def press_release(key):
+    PressKey(key)
+    time.sleep(0.1)
+    ReleaseKey(key)
+    time.sleep(0.1)
+
+
 def go_forward():
-    PressKey(W)
-    time.sleep(0.3)
-    ReleaseKey(W)
-    
+    press_release(W)
+
+
 def go_back():
-    PressKey(S)
-    time.sleep(0.1)
-    ReleaseKey(S)
-    
+    press_release(S)
+
+
 def go_left():
-    PressKey(A)
-    time.sleep(0.1)
-    ReleaseKey(A)
-    
+    press_release(A)
+
+
 def go_right():
-    PressKey(D)
-    time.sleep(0.1)
-    ReleaseKey(D)
-    
+    press_release(D)
+
+
+def attack():
+    press_release(J)
+
+
+def block():  # 格挡
+    press_release(K)
+
+
+def dodge():  # 闪避
+    press_release(L)
+
+
 def jump():
-    PressKey(K)
-    time.sleep(0.1)
-    ReleaseKey(K)
-    #time.sleep(0.1)
-    
-def dodge():#闪避
-    PressKey(R)
-    time.sleep(0.1)
-    ReleaseKey(R)
-    #time.sleep(0.1)
-    
-def lock_vision():
-    PressKey(V)
-    time.sleep(0.1)
-    ReleaseKey(V)
-    time.sleep(0.1)
+    press_release(I)
+
+def do_nothing():
+    pass
+
 
 if __name__ == '__main__':
     time.sleep(5)
     time1 = time.time()
-    while(True):
-        if abs(time.time()-time1) > 5:
+    while (True):
+        if abs(time.time() - time1) > 5:
             break
         else:
-            PressKey(M)
-            time.sleep(0.1)
-            ReleaseKey(M)
-            time.sleep(0.2)
-        
-    
-    PressKey(W)
-    time.sleep(0.4)
-    ReleaseKey(W)
-    time.sleep(1)
-    
-    PressKey(J)
-    time.sleep(0.1)
-    ReleaseKey(J)
-    time.sleep(1)
+            press_release(W)
+            press_release(S)
+            press_release(A)
+            press_release(D)
+            press_release(J)
+            press_release(K)
+            press_release(L)
+            press_release(I)

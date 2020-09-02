@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-import numpy as np
-from grabscreen import grab_screen
+from environment.utils.grabscreen import grab_screen
 import cv2
 import time
-from getkeys import key_check
-import random
+from environment.key_input.getkeys import key_check
 import os
 import os.path as osp
 
@@ -26,7 +24,7 @@ n_choise = [0, 0, 0, 0, 0, 1]
 # model = alexnet2(WIDTH, HEIGHT, LR, output = 6)
 # model.load(MODEL_NAME)
 
-window_size = (1120, 0, 1920, 450)  # 384,224  192,112 96,86
+window_size = (5, 0, 1024, 576)  # 384,224  192,112 96,86
 
 
 def main():
@@ -47,9 +45,10 @@ def main():
             cv2.waitKey(1)
             print('loop took {} ms\n'.format(time.time() - last_time) * 1000)
             last_time = time.time()
-            #screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
-            cv2.imwrite(osp.join(save_image_root,'screen_%05d.jpg' % im_count), screen)
-            im_count+=1
+            screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
+            #screen = cv2.resize(screen, (224, 224))
+            cv2.imwrite(osp.join(save_image_root, 'screen_%05d.jpg' % im_count), screen)
+            im_count += 1
         keys = key_check()
 
         # p pauses game and can get annoying.

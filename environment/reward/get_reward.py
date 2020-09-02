@@ -1,5 +1,4 @@
-import time, os
-from reward.memory import Memory
+from environment.reward.memory import Memory
 
 
 class RoleStatus:

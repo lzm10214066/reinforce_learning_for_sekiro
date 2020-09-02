@@ -6,8 +6,7 @@ import torch.utils.model_zoo as model_zoo
 
 
 __all__ = ['FBResNet',
-           #'fbresnet18', 'fbresnet34', 'fbresnet50', 'fbresnet101',
-           'fbresnet152']
+           'fbresnet18', 'fbresnet34', 'fbresnet50', 'fbresnet101', 'fbresnet152']
 
 pretrained_settings = {
     'fbresnet152': {
