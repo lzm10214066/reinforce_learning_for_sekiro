@@ -1,108 +1,52 @@
 env:
-    num_candidates: 100
-    num_episode: 1000
-    num_epoch_per_episode: 100
-    datasize: 50000
-    train_num: 40000
-    val_num: 2000
-    num_stages: 20
-    num_warmup_stages: 4
-    data: "your_data_root/cifar"
-    start_point: 0
-    total_iters: null
+    num_episode: 1
+    total_steps: -1
 
-    use_linklink_test: False
-    val_batch_size: 64
-    print_freq: 10
-    eval_freq: 100
-    val_print_freq: 50
-    log_dir: './logs_cifar10_imbalance'
-    save_dir: "./model_save_cifar10_imbalance"
-    save_interval: 1 # one episode
+    log_dir: 'logs'
+    save_dir: "models_save"
+    save_interval: 1000
     model_load_path: null
-    loss_reduction: 'none'
+
+    #region: [175, 0, 625, 450]
+    region: [5,0,800,450]
+    final_size: 224
 
     reward:
-        reward_option: "sub_reference_model"   # sub_no, sub_baseline, sub_pre, sub_reference_model
-        filter_loss_rate: 0.0
-        acc_rate: 1.0
-        loss_gap_rate: 0.0
-        action_norm_rate: 0.0
-        reward_weight: True
-        reward_wk: 5.
-        reward_scale: 2.
+        reward_option: "normal"   #
+        reward_scale: 2.aaaa
+        base_player: 0x7ff4f74423f0
+        base_boss: 0x7ff49eb297e0
 
-    smooth_rate: 0.8
-    label_noise: -1
-
-    use_feature_model: False
-    imbalance: True
-    imb_factor: 0.01
-
-    features:
-        use_logits: False
-        use_loss_norm: True
-        use_loss_abs: False
-        use_loss: False
-        use_entropy: True
-        entropy_norm: True
-        use_item_similarity: False
-        use_label: True
-        use_feature_model: False
-
-    learn_lr_gain: False
-    dataset: 'cifar10'
     model:
         arch: resnet
         kwargs:
             num_classes: 10
             depth: 32
 
-    e_learning_rate: 0.1
-    momentum: 0.9
-    weight_decay: 0.0005
-    workers: 2
-    lr_stages: [14, 17] # 学习率下降stage step
-
-    baseline:
-        baseline_out: False
-        b_tau: 0.1
-        baseline_in: null
-
-
 agent:
     dqn:
+        action_dim: 10
+
+        model_load_path: pretrain_models/resnet34-333f7ec4.pth
+        ignore_prefix: ['fc']
+
         # for learning
-        a_learning_rate: 0.00001
-        c_learning_rate: 0.001
+        a_learning_rate: 0.001
         actor_init_scale: 0.05
-        policy_batch_size: 32
-        tau: 0.001
+        policy_batch_size: 16
+        tau: 0.0001
         discount: 0.99
         max_grad_norm: 5
-        test_actor_step: 5
 
         # replay buffer size
-        buffer_size: 500
+        buffer_size: 5000
         update_full: True
         update_full_epoch: 8
 
         # for explore
         epsilon: 0.5
-        decay_epsilon: 0.0002 #1.0 / 5000
-        ou_theta: 0.15
-        ou_mu: 0
-        ou_sigma: 0.2
-        explore_prob: 0.3
-
-        step_embedding_dim: 16
-        other_state_dim: 3
-
-        num_node: 1
-        weight_option: 'add_weight'  # classify or add_weight
-
-        actor_net_width: 256
-        critic_net_width: 256
+        decay_epsilon: 0.00001
 
         weight_decay: 0.00001
-        actor_norm_rate: 0.001
+
+        tb_step: 10

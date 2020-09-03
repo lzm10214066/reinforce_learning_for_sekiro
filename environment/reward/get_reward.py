@@ -46,7 +46,7 @@ class RewardReader:
     def norm_v(self, current_v, max_v):
         return current_v / max_v
 
-    def get_reward(self):
+    def get_reward(self, action=None):
         self.read_current_status(self.player_status)
         reward_player = self.norm_v(self.player_status.current_health - self.player_status.max_health,
                                     self.player_status.max_health) + 0 * self.norm_v(
@@ -55,8 +55,11 @@ class RewardReader:
         self.change_value_to(self.player_status.current_HP_address, self.player_status.max_HP)
 
         self.read_current_status(self.boss_status)
+        r_hp_w = 0
+        if action == 4 or action == 5:
+            r_hp_w = 1
         reward_boss = self.norm_v(self.boss_status.pre_health - self.boss_status.current_health,
-                                  self.boss_status.max_health) + self.norm_v(
+                                  self.boss_status.max_health) + r_hp_w * self.norm_v(
             self.boss_status.pre_HP - self.boss_status.current_HP, self.boss_status.max_HP)
         self.boss_status.pre_health = self.boss_status.current_health
         self.boss_status.pre_HP = self.boss_status.current_HP
@@ -71,14 +74,17 @@ class RewardReader:
             self.change_value_to(self.boss_status.current_HP_address, self.boss_status.max_HP)
             self.boss_status.pre_HP = self.boss_status.max_HP
 
-        return reward_player + reward_boss
+        r = reward_player + 10 * reward_boss
+        # if action != 8:
+        #     reward -= 0.0001
+        return r
 
 
 if __name__ == '__main__':
-    base_player = 0x7ff4a7c3ac20
-    base_boss = 0x7ff4a492fd90
+    base_player = 0x7ff4f74423f0
+    base_boss = 0x7ff49eb297e0
     reward_reader = RewardReader(base_player, base_boss)
     while True:
-        reward = reward_reader.get_reward()
+        reward = reward_reader.get_reward(action=4)
         if abs(reward) > 0.000001:
             print('reward:', reward)

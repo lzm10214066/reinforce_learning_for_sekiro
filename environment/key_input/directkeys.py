@@ -24,12 +24,14 @@ K = 0x25  # block
 L = 0x26  # dodge
 I = 0x17  # jump
 
+# view
+M = 0x32
+
 # backup
 LSHIFT = 0x2A
 R = 0x13
 V = 0x2F
 Q = 0x10
-M = 0x32
 O = 0x18
 P = 0x19
 C = 0x2E
@@ -122,12 +124,20 @@ def block():  # 格挡
 
 def dodge():  # 闪避
     press_release(L)
+    pass
 
 
 def jump():
     press_release(I)
+    pass
+
 
 def do_nothing():
+    pass
+
+
+def fix_view():
+    #dpress_release(M)
     pass
 
 

@@ -10,12 +10,12 @@ class Environment:
     def __init__(self, config):
         self.config = config
         self.action_map = {0: go_forward, 1: go_back, 2: go_left, 3: go_right, 4: attack, 5: block, 6: dodge, 7: jump,
-                           8: do_nothing}
+                           8: do_nothing, 9: fix_view}
 
-        self.reward_reader = RewardReader(self.config.base_player, self.config.base_boss)
-        self.init_state = np.zeros([3, 224, 224])
-        self.region = (5, 0, 1024, 576)
-        self.final_size = (224, 224)
+        self.reward_reader = RewardReader(self.config.reward.base_player, self.config.reward.base_boss)
+        self.init_state = np.zeros([3, self.config.final_size, self.config.final_size], dtype=np.float32)
+        self.region = self.config.region
+        self.final_size = (self.config.final_size, self.config.final_size)
 
     def trans_img(self, img):
         img = cv2.resize(img, self.final_size)
@@ -27,10 +27,12 @@ class Environment:
         img = img.float()
         return img
 
-    def step(self, state, action):
-        self.action_map[action]()
-        reward = self.reward_reader.get_reward()
+    def step(self, action, state, mimi_f=False):
+        if not mimi_f:
+            f = self.action_map[action]
+            f()
+        reward = self.reward_reader.get_reward(action)
         cur_img = grab_screen(region=self.region)
         cur_img = self.trans_img(cur_img)
-        next_state = np.concatenate([state[1:], cur_img], dim=0)
+        next_state = np.concatenate([state[1:], cur_img], axis=0)
         return next_state, reward

@@ -24,7 +24,7 @@ n_choise = [0, 0, 0, 0, 0, 1]
 # model = alexnet2(WIDTH, HEIGHT, LR, output = 6)
 # model.load(MODEL_NAME)
 
-window_size = (5, 0, 1024, 576)  # 384,224  192,112 96,86
+window_size = (175, 0, 625, 450)  # 384,224  192,112 96,86
 
 
 def main():

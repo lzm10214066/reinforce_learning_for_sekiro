@@ -4,7 +4,7 @@ Created on Wed Apr  8 12:03:44 2020
 
 @author: analoganddigital   ( GitHub )
 """
-
+import numpy as np
 import win32api as wapi
 import time
 
@@ -42,9 +42,31 @@ def get_key(keys):
     return output
 
 
+def get_action():
+    action = -1
+    while action == -1:
+        keys = key_check()
+        if 'W' in keys:
+            action = 0
+        elif 'A' in keys:
+            action = 2
+        elif 'S' in keys:
+            action = 1
+        elif 'D' in keys:
+            action = 3
+        elif 'J' in keys:
+            action = 4
+        elif 'K' in keys:
+            action = 5
+        elif 'L' in keys:
+            action = 6
+        elif 'I' in keys:
+            action = 7
+        elif 'M' in keys:
+            action = 9
+    return np.int64(action)
+
+
 if __name__ == '__main__':
     while True:
-        if get_key(key_check()) != [1, 1, 1, 1, 1, 1]:
-            print(key_check())
-        else:
-            break
+        print(get_action())

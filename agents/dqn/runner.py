@@ -8,6 +8,7 @@ import os
 import time
 import numpy as np
 from tensorboardX import SummaryWriter
+from environment.key_input.getkeys import key_check, get_action
 
 Transition = collections.namedtuple("Transition",
                                     ["state", "action", "reward", "next_state", "done"])
@@ -28,16 +29,13 @@ class Runner:
         agent.cuda()
         env = Environment(self.config.env)
 
-        if self.config.env.model_load_path is not None:
-            agent.load_state_dict(torch.load(self.config.env.model_load_path))
-
         # define log out
         time_array = time.localtime(time.time())
         log_time = time.strftime("%Y_%m_%d_%H_%M_%S", time_array)
         # name log_dir with paras
         log_dir_name = '_'.join([self.config.env.reward.reward_option,
                                  str(self.config.agent.dqn.buffer_size),
-                                 str(self.config.agent.ddpg.a_learning_rate), log_time])
+                                 str(self.config.agent.dqn.a_learning_rate), log_time])
 
         log_dir = os.path.join(self.config.log_root, self.config.env.log_dir, log_dir_name)
         if os.path.exists(log_dir) is False:
@@ -56,17 +54,28 @@ class Runner:
             episode_log = 'sekiro_episode_' + str(current_episode)
             log_path = os.path.join(log_dir, episode_log)
             tb_logger = SummaryWriter(log_path)
+            tb_step = self.config.agent.dqn.tb_step
 
             cur_step = 0
             state = env.init_state
 
+            mimic_f = False
             while True:
                 end = time.time()
-                action = agent.select_action_with_explore(state)
-                next_state, reward = env.step(action, state)
+                keys = key_check()
+                action_info = 'people'
+                if 'P' in keys:
+                    mimic_f = not mimic_f
+                if mimic_f:
+                    action = get_action()
+                else:
+                    action_info = 'learning action'
+                    action = agent.select_action_with_explore(state)
+
+                next_state, reward = env.step(action, state, mimic_f)
                 trans = Transition(state=state, action=action, next_state=next_state, reward=reward, done=False)
                 agent.buffer.add(trans)
-                agent.update_qnet()
+                agent.update_qnet(cur_step, tb_logger, tb_step)
                 cur_step += 1
 
                 if cur_step % self.config.env.save_interval == 0:
@@ -75,4 +84,5 @@ class Runner:
 
                 tb_logger.add_scalar('reward', reward, cur_step)
                 dtime = time.time() - end
-                print('step:', cur_step, 'reward:', reward, 'dtime:', dtime, )
+                if abs(reward)> 0.0001:
+                    print('step:', cur_step, 'action:', action, 'reward:', reward, 'dtime:', dtime, action_info)
