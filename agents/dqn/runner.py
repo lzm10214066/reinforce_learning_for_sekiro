@@ -58,10 +58,10 @@ class Runner:
 
             cur_step = 0
             state = env.init_state
+            end = time.time()
 
             mimic_f = False
             while True:
-                end = time.time()
                 keys = key_check()
                 action_info = 'people'
                 if 'P' in keys:
@@ -73,6 +73,12 @@ class Runner:
                     action = agent.select_action_with_explore(state)
 
                 next_state, reward = env.step(action, state, mimic_f)
+
+                if abs(reward) > 0.0001:
+                    dtime = time.time() - end
+                    print('step:', cur_step, 'action:', action, 'reward:', reward, 'dtime:', dtime, action_info)
+                    end = time.time()
+
                 trans = Transition(state=state, action=action, next_state=next_state, reward=reward, done=False)
                 agent.buffer.add(trans)
                 agent.update_qnet(cur_step, tb_logger, tb_step)
@@ -83,6 +89,3 @@ class Runner:
                     agent.save_model(save_path)
 
                 tb_logger.add_scalar('reward', reward, cur_step)
-                dtime = time.time() - end
-                if abs(reward)> 0.0001:
-                    print('step:', cur_step, 'action:', action, 'reward:', reward, 'dtime:', dtime, action_info)

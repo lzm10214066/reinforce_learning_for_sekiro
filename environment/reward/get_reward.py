@@ -48,16 +48,17 @@ class RewardReader:
 
     def get_reward(self, action=None):
         self.read_current_status(self.player_status)
+        self.read_current_status(self.boss_status)
+
         reward_player = self.norm_v(self.player_status.current_health - self.player_status.max_health,
                                     self.player_status.max_health) + 0 * self.norm_v(
             self.player_status.current_HP - self.player_status.max_HP, self.player_status.max_HP)
         self.change_value_to(self.player_status.current_health_address, self.player_status.max_health)
         self.change_value_to(self.player_status.current_HP_address, self.player_status.max_HP)
 
-        self.read_current_status(self.boss_status)
-        r_hp_w = 0
-        if action == 4 or action == 5:
-            r_hp_w = 1
+        r_hp_w = 1
+        # if action == 0 or action == 1:
+        #     r_hp_w = 1
         reward_boss = self.norm_v(self.boss_status.pre_health - self.boss_status.current_health,
                                   self.boss_status.max_health) + r_hp_w * self.norm_v(
             self.boss_status.pre_HP - self.boss_status.current_HP, self.boss_status.max_HP)
@@ -75,8 +76,8 @@ class RewardReader:
             self.boss_status.pre_HP = self.boss_status.max_HP
 
         r = reward_player + 10 * reward_boss
-        # if action != 8:
-        #     reward -= 0.0001
+        if action != 4:
+            r -= 0.0001
         return r
 
 

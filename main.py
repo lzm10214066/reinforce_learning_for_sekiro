@@ -2,16 +2,16 @@ import argparse
 import yaml
 from easydict import EasyDict
 import os
-from agents.dqn.runner import Runner
 import time
+
 
 def get_args():
     parser = argparse.ArgumentParser(description='RL')
     parser.add_argument(
-        '--algo', default='dqn', help='algorithm to use: ddpg')
+        '--algo', default='dqn_per', help='algorithm to use: dqn')
 
     parser.add_argument(
-        '--config', default='./experiments/dqn/config.yaml',
+        '--config', default='./experiments/dqn_per/config.yaml',
         help='config')
 
     args = parser.parse_args()
@@ -26,6 +26,11 @@ if __name__ == '__main__':
     print('start.....')
 
     args = get_args()
+    if args.algo == 'dqn':
+        from agents.dqn.runner import Runner
+    elif args.algo == 'dqn_per':
+        from agents.dqn_per.runner import Runner
+
     with open(args.config) as f:
         config = EasyDict(yaml.load(f, yaml.FullLoader))
     config.log_root = os.path.dirname(args.config)

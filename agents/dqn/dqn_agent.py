@@ -17,14 +17,14 @@ class DQNAgent(nn.Module):
 
         self.config = config
         self.action_dim = self.config.action_dim
-        self.q_net = models.resnet34(pretrained=False, num_classes=self.config.action_dim)
+        self.q_net = models.resnet18(pretrained=False, num_classes=self.config.action_dim)
         # for k in self.q_net.state_dict():
         #     print(k)
 
         if self.config.model_load_path is not None:
             load_state_simple(self.config.model_load_path, self.q_net, self.config.ignore_prefix)
 
-        self.q_tar_net = models.resnet34(pretrained=False, num_classes=self.config.action_dim)
+        self.q_tar_net = models.resnet18(pretrained=False, num_classes=self.config.action_dim)
 
         self.q_tar_net.eval()
         self.hard_update(self.q_tar_net, self.q_net)  # Make sure target is with the same weight

@@ -93,13 +93,14 @@ def ReleaseKey(hexKeyCode):
 
 def press_release(key):
     PressKey(key)
-    time.sleep(0.1)
+    time.sleep(0.2)
     ReleaseKey(key)
-    time.sleep(0.1)
+    time.sleep(0.2)
 
 
 def go_forward():
     press_release(W)
+
 
 
 def go_back():
@@ -133,11 +134,13 @@ def jump():
 
 
 def do_nothing():
+    time.sleep(0.5)
     pass
 
 
 def fix_view():
     #dpress_release(M)
+    time.sleep(0.5)
     pass
 
 
