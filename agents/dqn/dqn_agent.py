@@ -153,11 +153,11 @@ class DQNAgent(nn.Module):
             #       "\tnext_q_predict:", next_q_values[0].item(),
             #       "\tepsilon:", self.epsilon)
 
-    def select_action_with_explore(self, state, decay_epsilon=True):
+    def select_action_with_explore(self, state, action_info='', decay_epsilon=True):
         e = np.random.random_sample()
         if e <= self.epsilon:
             action = np.random.randint(0, self.action_dim - 1)
-            print('Random action:')
+            action_info += "  random"
         else:
             state = torch.from_numpy(np.expand_dims(state, axis=0)).cuda()
             self.q_net.eval()
@@ -168,7 +168,7 @@ class DQNAgent(nn.Module):
         if decay_epsilon:
             self.epsilon = max(self.epsilon - self.config.decay_epsilon, 0)
         action = np.int64(action)
-        return action
+        return action, action_info
 
     def load_model(self, path):
         if path is None:

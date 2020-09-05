@@ -24,9 +24,7 @@ class Environment:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img = img * 3.2 / 255.0 - 1.6
         # img = img.transpose((2, 0, 1))
-        img = np.expand_dims(img, axis=0)
-        img = torch.from_numpy(img)
-        img = img.float()
+        img = np.expand_dims(img, axis=0).astype(np.float32)
         return img
 
     def step(self, action, state, mimi_f=False):

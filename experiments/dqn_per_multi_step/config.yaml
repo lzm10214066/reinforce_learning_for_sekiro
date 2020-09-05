@@ -44,7 +44,7 @@ agent:
         update_full_epoch: 8
 
         # for explore
-        epsilon: 0.5
+        epsilon: 0.
         decay_epsilon: 0.00001
 
         weight_decay: 0.00001
@@ -52,3 +52,5 @@ agent:
         tb_step: 10
 
         alpha: 1
+
+        num_steps: 4

@@ -17,6 +17,13 @@ Transition = collections.namedtuple("Transition",
 class Runner:
     def __init__(self, config):
         self.config = config
+        self.num_steps = self.config.agent.dqn_per.num_steps
+        self.state_buffer = collections.deque()
+
+    def cache_states(self, state, reward):
+        if len(self.state_buffer) == self.num_steps:
+            self.state_buffer.popleft()
+        self.state_buffer.append((state, reward))
 
     def run(self):
         torch.manual_seed(0)
@@ -52,6 +59,9 @@ class Runner:
         # with open(paras_path, "w", encoding='utf-8') as f:
         #     yaml.dump(self.config, f)
 
+        for i in range(self.num_steps):
+            self.cache_states(env.init_state, 0)
+
         for current_episode in range(self.config.env.num_episode):
             episode_log = 'sekiro_episode_' + str(current_episode)
             log_path = os.path.join(log_dir, episode_log)
@@ -84,7 +94,10 @@ class Runner:
 
                     next_state, reward = env.step(action, state, mimic_f)
 
-                    trans = Transition(state=state, action=action, next_state=next_state, reward=reward, done=False)
+                    G = 0
+                    for i in range(self.num_steps):
+                        G += self.config.agent.dqn_per.discount ** i * self.state_buffer[i][1]
+                    trans = Transition(state=self.state_buffer[0][0], action=action, next_state=next_state, reward=G, done=False)
                     agent.buffer.add_T(trans)
                     agent.buffer.add_P(0)
                     agent.update_qnet(cur_step, tb_logger, tb_step)
@@ -97,6 +110,7 @@ class Runner:
                     tb_logger.add_scalar('reward', reward, cur_step)
 
                     state = next_state
+                    self.cache_states(state, reward)
 
                     dtime = time.time() - end
                     if abs(reward) > -0.0001:

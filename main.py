@@ -30,6 +30,8 @@ if __name__ == '__main__':
         from agents.dqn.runner import Runner
     elif args.algo == 'dqn_per':
         from agents.dqn_per.runner import Runner
+    else:
+        from agents.dqn_per_multi_step.runner import Runner
 
     with open(args.config) as f:
         config = EasyDict(yaml.load(f, yaml.FullLoader))

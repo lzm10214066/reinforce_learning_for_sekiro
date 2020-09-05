@@ -25,6 +25,8 @@ class DQN_PER_Agent(DQNAgent):
         state_batch, action_batch, reward_batch, next_state_batch, terminal_batch, sample_indices = \
             self.buffer.sample_batch(self.batch_size)
 
+        print('state_debug:', np.sum(state_batch-next_state_batch))
+
         state_batch = torch.from_numpy(state_batch).cuda()
         action_batch = torch.from_numpy(np.expand_dims(action_batch, axis=1)).cuda()
         reward_batch = torch.from_numpy(reward_batch.astype(np.float32)).cuda()
@@ -65,45 +67,3 @@ class DQN_PER_Agent(DQNAgent):
             #       "\tq_predict:", q_batch[0].item(),
             #       "\tnext_q_predict:", next_q_values[0].item(),
             #       "\tepsilon:", self.epsilon)
-
-    def select_action_with_explore(self, state, action_info='', decay_epsilon=True, ):
-        e = np.random.random_sample()
-        if e <= self.epsilon:
-            action = np.random.randint(0, self.action_dim - 1)
-            action_info += "  random"
-        else:
-            state = torch.from_numpy(np.expand_dims(state, axis=0)).cuda()
-            self.q_net.eval()
-            with torch.no_grad():
-                q_out = self.q_net(state)
-                action = torch.argmax(q_out, dim=1).item()
-            self.q_net.train()
-        if decay_epsilon:
-            self.epsilon = max(self.epsilon - self.config.decay_epsilon, 0)
-        action = np.int64(action)
-        return action, action_info
-
-    def load_model(self, path):
-        if path is None:
-            print('the path is None')
-            return
-        self.load_state_dict(torch.load(path))
-        print('load ', path)
-
-    def save_model(self, path):
-        torch.save(self.state_dict(), path)
-
-    def seed(self, s):
-        torch.manual_seed(s)
-        if self.use_cuda:
-            torch.cuda.manual_seed(s)
-
-    def soft_update(self, target, source, tau):
-        for target_param, param in zip(target.parameters(), source.parameters()):
-            target_param.data.copy_(
-                target_param.data * (1.0 - tau) + param.data * tau
-            )
-
-    def hard_update(self, target, source):
-        for target_param, param in zip(target.parameters(), source.parameters()):
-            target_param.data.copy_(param.data)

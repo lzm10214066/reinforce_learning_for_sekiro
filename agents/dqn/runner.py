@@ -58,34 +58,43 @@ class Runner:
 
             cur_step = 0
             state = env.init_state
-            end = time.time()
 
             mimic_f = False
+            pause_f = False
             while True:
+                end = time.time()
                 keys = key_check()
-                action_info = 'people'
-                if 'P' in keys:
-                    mimic_f = not mimic_f
-                if mimic_f:
-                    action = get_action()
+                if 'H' in keys:
+                    pause_f = not pause_f
+                    time.sleep(1)
+                if pause_f:
+                    print('\rlearning pause', end='')
                 else:
-                    action_info = 'learning action'
-                    action = agent.select_action_with_explore(state)
+                    action_info = 'people'
+                    if 'P' in keys:
+                        mimic_f = not mimic_f
+                    if mimic_f:
+                        action = get_action()
+                        time.sleep(1)
+                    else:
+                        action_info = 'learning action'
+                        action, action_info = agent.select_action_with_explore(state, action_info)
 
-                next_state, reward = env.step(action, state, mimic_f)
+                    next_state, reward = env.step(action, state, mimic_f)
 
-                if abs(reward) > 0.0001:
+                    trans = Transition(state=state, action=action, next_state=next_state, reward=reward, done=False)
+                    agent.buffer.add(trans)
+                    agent.update_qnet(cur_step, tb_logger, tb_step)
+                    cur_step += 1
+
+                    if cur_step % self.config.env.save_interval == 0:
+                        save_path = os.path.join(save_dir, 'dqn_sekiro_step_' + str(cur_step) + '.pth')
+                        agent.save_model(save_path)
+
+                    tb_logger.add_scalar('reward', reward, cur_step)
+
+                    state = next_state
+
+                    # if abs(reward) > 0.0001:
                     dtime = time.time() - end
                     print('step:', cur_step, 'action:', action, 'reward:', reward, 'dtime:', dtime, action_info)
-                    end = time.time()
-
-                trans = Transition(state=state, action=action, next_state=next_state, reward=reward, done=False)
-                agent.buffer.add(trans)
-                agent.update_qnet(cur_step, tb_logger, tb_step)
-                cur_step += 1
-
-                if cur_step % self.config.env.save_interval == 0:
-                    save_path = os.path.join(save_dir, 'dqn_sekiro_step_' + str(cur_step) + '.pth')
-                    agent.save_model(save_path)
-
-                tb_logger.add_scalar('reward', reward, cur_step)

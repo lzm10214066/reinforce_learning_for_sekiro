@@ -14,8 +14,8 @@ env:
     reward:
         reward_option: "normal"   #
         reward_scale: 2.aaaa
-        base_player: 0x7ff4fa596c90
-        base_boss: 0x7ff4a132f960
+        base_player: 0x7ff4a53b69d0
+        base_boss: 0x7ff4ab0d11d0
 
     model:
         arch: resnet

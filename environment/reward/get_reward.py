@@ -44,7 +44,7 @@ class RewardReader:
         status.max_HP = self.m.Read_UINT32(self.cHandle, status.max_HP_address)
 
     def norm_v(self, current_v, max_v):
-        return current_v / max_v
+        return current_v / (max_v+1e-3)
 
     def get_reward(self, action=None):
         self.read_current_status(self.player_status)

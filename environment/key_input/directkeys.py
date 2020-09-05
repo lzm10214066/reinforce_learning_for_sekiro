@@ -93,9 +93,9 @@ def ReleaseKey(hexKeyCode):
 
 def press_release(key):
     PressKey(key)
-    time.sleep(0.2)
+    time.sleep(0.1)
     ReleaseKey(key)
-    time.sleep(0.2)
+    time.sleep(0.1)
 
 
 def go_forward():
