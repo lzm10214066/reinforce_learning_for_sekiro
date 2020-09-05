@@ -134,13 +134,13 @@ def jump():
 
 
 def do_nothing():
-    time.sleep(0.5)
+    time.sleep(0.1)
     pass
 
 
 def fix_view():
     #dpress_release(M)
-    time.sleep(0.5)
+    time.sleep(0.1)
     pass
 
 

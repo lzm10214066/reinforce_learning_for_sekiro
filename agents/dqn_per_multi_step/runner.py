@@ -18,12 +18,11 @@ class Runner:
     def __init__(self, config):
         self.config = config
         self.num_steps = self.config.agent.dqn_per.num_steps
-        self.state_buffer = collections.deque()
+        self.state_buffer = []
 
-    def cache_states(self, state, reward):
-        if len(self.state_buffer) == self.num_steps:
-            self.state_buffer.popleft()
-        self.state_buffer.append((state, reward))
+    def cache_states(self, state, reward, action):
+        self.state_buffer.append((state, reward, action))
+        self.state_buffer = self.state_buffer[1:]
 
     def run(self):
         torch.manual_seed(0)
@@ -60,7 +59,7 @@ class Runner:
         #     yaml.dump(self.config, f)
 
         for i in range(self.num_steps):
-            self.cache_states(env.init_state, 0)
+            self.state_buffer.append((env.init_state, float(0), np.int64(0)))
 
         for current_episode in range(self.config.env.num_episode):
             episode_log = 'sekiro_episode_' + str(current_episode)
@@ -96,8 +95,9 @@ class Runner:
 
                     G = 0
                     for i in range(self.num_steps):
-                        G += self.config.agent.dqn_per.discount ** i * self.state_buffer[i][1]
-                    trans = Transition(state=self.state_buffer[0][0], action=action, next_state=next_state, reward=G, done=False)
+                        G += agent.discount ** i * self.state_buffer[i][1]
+                    trans = Transition(state=self.state_buffer[0][0], action=self.state_buffer[0][2],
+                                       next_state=next_state, reward=G, done=False)
                     agent.buffer.add_T(trans)
                     agent.buffer.add_P(0)
                     agent.update_qnet(cur_step, tb_logger, tb_step)
@@ -110,7 +110,7 @@ class Runner:
                     tb_logger.add_scalar('reward', reward, cur_step)
 
                     state = next_state
-                    self.cache_states(state, reward)
+                    self.cache_states(state, reward, action)
 
                     dtime = time.time() - end
                     if abs(reward) > -0.0001:

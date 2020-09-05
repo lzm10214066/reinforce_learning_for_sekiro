@@ -40,7 +40,7 @@ class DQNAgent(nn.Module):
 
         # Hyper-parameters
         self.batch_size = self.config.policy_batch_size
-        self.discount = self.config.discount
+        self.discount = float(self.config.discount)
         self.decay_epsilon = self.config.decay_epsilon
         self.epsilon = self.config.epsilon
         self.max_grad_norm = self.config.max_grad_norm
@@ -125,7 +125,7 @@ class DQNAgent(nn.Module):
             next_q_index = torch.argmax(self.q_net(next_state_batch), dim=1, keepdim=True)
             next_q_values = self.q_tar_net(next_state_batch).gather(index=next_q_index, dim=1).squeeze()
 
-        target_q_batch = reward_batch + float(self.discount) * (1 - terminal_batch) * next_q_values
+        target_q_batch = reward_batch + self.discount * (1 - terminal_batch) * next_q_values
 
         q_batch = self.q_net(state_batch).gather(index=action_batch, dim=1)
 
@@ -147,26 +147,25 @@ class DQNAgent(nn.Module):
             tb_logger.add_scalar('next_q', next_q_values[0], total_i)
             tb_logger.add_scalar('epsilon', self.epsilon, total_i)
 
-            # print("policy_step:", total_i,
-            #       "\tvalue_loss:", value_loss.item(),
-            #       "\tq_predict:", q_batch[0].item(),
-            #       "\tnext_q_predict:", next_q_values[0].item(),
-            #       "\tepsilon:", self.epsilon)
+            print("policy_step:", total_i,
+                  "\tvalue_loss:", value_loss.item(),
+                  "\tq_predict:", q_batch[0].item(),
+                  "\tnext_q_predict:", next_q_values[0].item(),
+                  "\tepsilon:", self.epsilon)
 
-    def select_action_with_explore(self, state, action_info='', decay_epsilon=True):
+    def select_action_with_explore(self, state, action_info=''):
         e = np.random.random_sample()
         if e <= self.epsilon:
             action = np.random.randint(0, self.action_dim - 1)
             action_info += "  random"
         else:
             state = torch.from_numpy(np.expand_dims(state, axis=0)).cuda()
-            self.q_net.eval()
+            # self.q_net.eval()
             with torch.no_grad():
                 q_out = self.q_net(state)
                 action = torch.argmax(q_out, dim=1).item()
-            self.q_net.train()
-        if decay_epsilon:
-            self.epsilon = max(self.epsilon - self.config.decay_epsilon, 0)
+            # self.q_net.train()
+        self.epsilon = max(self.epsilon - self.config.decay_epsilon, 0)
         action = np.int64(action)
         return action, action_info
 

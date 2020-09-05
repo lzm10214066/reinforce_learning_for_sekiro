@@ -8,10 +8,10 @@ import time
 def get_args():
     parser = argparse.ArgumentParser(description='RL')
     parser.add_argument(
-        '--algo', default='dqn_per', help='algorithm to use: dqn')
+        '--algo', default='dqn_per_multi_step', help='algorithm to use: dqn')
 
     parser.add_argument(
-        '--config', default='./experiments/dqn_per/config.yaml',
+        '--config', default='./experiments/dqn_per_multi_step/config.yaml',
         help='config')
 
     args = parser.parse_args()

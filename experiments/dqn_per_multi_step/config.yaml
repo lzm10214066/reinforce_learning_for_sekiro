@@ -9,13 +9,13 @@ env:
 
     #region: [175, 0, 625, 450]
     region: [5,0,800,450]
-    final_size: 112
+    final_size: 224
 
     reward:
         reward_option: "normal"   #
         reward_scale: 2.aaaa
-        base_player: 0x7ff4a6baaa30
-        base_boss: 0x7ff4fdb1b5b0
+        base_player: 0x7ff4f6e583c0
+        base_boss: 0x7ff4f9b2d560
 
     model:
         arch: resnet
@@ -26,16 +26,16 @@ env:
 agent:
     dqn_per:
         action_dim: 5
-        agent_model_path: null #experiments/dqn_per/models_save/normal_5000_0.001/dqn_sekiro_step_15000.pth
+        agent_model_path: experiments/dqn_per_multi_step/models_save/normal_5000_0.0001_2020_09_05_20_02_02/dqn_sekiro_step_9000.pth #experiments/dqn_per/models_save/normal_5000_0.001/dqn_sekiro_step_15000.pth
         model_load_path: null #pretrain_models/resnet18.pth
         ignore_prefix: ['fc']
 
         # for learning
-        a_learning_rate: 0.001
+        a_learning_rate: 0.0001
         actor_init_scale: 0.05
         policy_batch_size: 32
-        tau: 0.0001
-        discount: 0.99
+        tau: 0.00001
+        discount: 0.9
         max_grad_norm: 5
 
         # replay buffer size
@@ -44,10 +44,10 @@ agent:
         update_full_epoch: 8
 
         # for explore
-        epsilon: 0.
+        epsilon: 0.5
         decay_epsilon: 0.00001
 
-        weight_decay: 0.00001
+        weight_decay: 0.0001
 
         tb_step: 10
 
