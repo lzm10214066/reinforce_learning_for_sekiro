@@ -95,12 +95,11 @@ def press_release(key):
     PressKey(key)
     time.sleep(0.1)
     ReleaseKey(key)
-    time.sleep(0.1)
+    time.sleep(0.15)
 
 
 def go_forward():
     press_release(W)
-
 
 
 def go_back():
@@ -129,7 +128,8 @@ def dodge():  # 闪避
 
 
 def jump():
-    press_release(I)
+    #press_release(I)
+    time.sleep(0.1)
     pass
 
 
@@ -139,9 +139,12 @@ def do_nothing():
 
 
 def fix_view():
-    #dpress_release(M)
-    time.sleep(0.1)
+    press_release(M)
     pass
+
+
+def pause():
+    press_release(ESC)
 
 
 if __name__ == '__main__':

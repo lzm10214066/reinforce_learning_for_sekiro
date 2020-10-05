@@ -43,29 +43,31 @@ def get_key(keys):
 
 
 def get_action():
-    action = 4
-    #while action == -1:
-    keys = key_check()
-    # if 'W' in keys:
-    #     action = 0
-    # elif 'A' in keys:
-    #     action = 2
-    # elif 'S' in keys:
-    #     action = 1
-    # elif 'D' in keys:
-    #     action = 3
-    if 'J' in keys:
-        action = 0
-    elif 'K' in keys:
-        action = 1
-    elif 'L' in keys:
-        action = 2
-    elif 'I' in keys:
-        action = 3
-    elif 'M' in keys:
-        action = 5
-    elif 'O' in keys:
-        action = 4
+    action = -1
+    while action == -1:
+        keys = key_check()
+        # if 'W' in keys:
+        #     action = 0
+        # elif 'A' in keys:
+        #     action = 2
+        # elif 'S' in keys:
+        #     action = 1
+        # elif 'D' in keys:
+        #     action = 3
+        if 'J' in keys:
+            action = 0
+        elif 'K' in keys:
+            action = 1
+        elif 'L' in keys:
+            action = 2
+        elif 'I' in keys:
+            action = 3
+        elif 'M' in keys:
+            action = 5
+        elif 'O' in keys:
+            action = 4
+        # if action == 4:
+        #     time.sleep(0.2)
     return np.int64(action)
 
 

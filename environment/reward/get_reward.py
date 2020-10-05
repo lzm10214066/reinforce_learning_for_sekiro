@@ -77,7 +77,7 @@ class RewardReader:
 
         r = reward_player + 10 * reward_boss
         if action != 4:
-            r -= 0.0001
+            r -= 0.01
         return r
 
 
@@ -87,5 +87,5 @@ if __name__ == '__main__':
     reward_reader = RewardReader(base_player, base_boss)
     while True:
         reward = reward_reader.get_reward(action=4)
-        if abs(reward) > 0.000001:
+        if abs(reward) > -0.000001:
             print('reward:', reward)

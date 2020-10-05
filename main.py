@@ -8,10 +8,10 @@ import time
 def get_args():
     parser = argparse.ArgumentParser(description='RL')
     parser.add_argument(
-        '--algo', default='dqn_per_multi_step', help='algorithm to use: dqn')
+        '--algo', default='dqn_full_replay', help='algorithm to use: dqn')
 
     parser.add_argument(
-        '--config', default='./experiments/dqn_per_multi_step/config.yaml',
+        '--config', default='./experiments/dqn_full_replay/config.yaml',
         help='config')
 
     args = parser.parse_args()
@@ -30,8 +30,10 @@ if __name__ == '__main__':
         from agents.dqn.runner import Runner
     elif args.algo == 'dqn_per':
         from agents.dqn_per.runner import Runner
-    else:
+    elif args.algo == 'dqn_per_multi_step':
         from agents.dqn_per_multi_step.runner import Runner
+    elif args.algo == 'dqn_full_replay':
+        from agents.dqn_full_replay.runner import Runner
 
     with open(args.config) as f:
         config = EasyDict(yaml.load(f, yaml.FullLoader))

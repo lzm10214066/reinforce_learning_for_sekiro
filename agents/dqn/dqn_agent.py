@@ -7,6 +7,7 @@ from torch.optim import Adam
 from torchvision import models
 from agents.dqn.replay_buffer import ReplayBuffer
 from utils import load_state, load_state_simple
+from models.fbresnet_nobn import fbresnet18
 
 criterion = nn.MSELoss()
 
@@ -17,14 +18,16 @@ class DQNAgent(nn.Module):
 
         self.config = config
         self.action_dim = self.config.action_dim
-        self.q_net = models.resnet18(pretrained=False, num_classes=self.config.action_dim)
+        self.q_net = fbresnet18(num_classes=self.config.action_dim)
+        #self.q_net = models.vgg16(pretrained=False, num_classes=self.config.action_dim)
         # for k in self.q_net.state_dict():
         #     print(k)
 
         if self.config.model_load_path is not None:
             load_state_simple(self.config.model_load_path, self.q_net, self.config.ignore_prefix)
 
-        self.q_tar_net = models.resnet18(pretrained=False, num_classes=self.config.action_dim)
+        self.q_tar_net = fbresnet18(num_classes=self.config.action_dim)
+        #self.q_tar_net = models.vgg16(pretrained=False, num_classes=self.config.action_dim)
 
         self.q_tar_net.eval()
         self.hard_update(self.q_tar_net, self.q_net)  # Make sure target is with the same weight
@@ -71,19 +74,20 @@ class DQNAgent(nn.Module):
                 terminal_batch = np.array([_[4] for _ in batch])
 
                 state_batch = torch.from_numpy(state_batch).cuda()
+                action_batch = torch.from_numpy(np.expand_dims(action_batch, axis=1)).cuda()
+                reward_batch = torch.from_numpy(reward_batch.astype(np.float32)).cuda()
                 next_state_batch = torch.from_numpy(next_state_batch).cuda()
+                terminal_batch = torch.from_numpy(terminal_batch.astype(np.float32)).cuda()
                 # Prepare for the target q batch
                 with torch.no_grad():
-                    next_q = torch.argmax(self.q_net(next_state_batch), dim=1)
-                    next_q_values = self.q_target(next_state_batch)[next_q]
+                    next_q_index = torch.argmax(self.q_net(next_state_batch), dim=1, keepdim=True)
+                    next_q_values = self.q_tar_net(next_state_batch).gather(index=next_q_index, dim=1).squeeze()
 
-                target_q_batch = reward_batch + self.discount * (
-                        1 - terminal_batch.astype(np.float32)) * next_q_values.cpu().numpy()
+                target_q_batch = reward_batch + self.discount * (1 - terminal_batch) * next_q_values
 
-                action_batch_t = torch.from_numpy(action_batch.astype(np.float32)).cuda()
-                q_batch = self.q_net(state_batch)[action_batch_t]
+                q_batch = self.q_net(state_batch).gather(index=action_batch, dim=1)
 
-                value_loss = criterion(q_batch, torch.tensor(target_q_batch, dtype=torch.float32).cuda())
+                value_loss = criterion(q_batch.squeeze(), target_q_batch).cuda()
 
                 # Critic update
                 self.q_net_optim.zero_grad()
@@ -102,11 +106,11 @@ class DQNAgent(nn.Module):
                     tb_logger.add_scalar('next_q', next_q_values[0], total_i)
                     tb_logger.add_scalar('epsilon', self.epsilon, total_i)
 
-                    # print("policy_step:", total_i,
-                    #       "\tvalue_loss:", value_loss.item(),
-                    #       "\tq_predict:", q_batch[0].item(),
-                    #       "\tnext_q_predict:", next_q_values[0].item(),
-                    #       "\tepsilon:", self.epsilon)
+                    print("policy_step:", total_i,
+                          "\tvalue_loss:", value_loss.item(),
+                          "\tq_predict:", q_batch[0].item(),
+                          "\tnext_q_predict:", next_q_values[0].item(),
+                          "\tepsilon:", self.epsilon)
 
     def update_qnet(self, total_i, tb_logger, tb_step):
         if self.buffer.size() < self.batch_size:
@@ -156,7 +160,7 @@ class DQNAgent(nn.Module):
     def select_action_with_explore(self, state, action_info=''):
         e = np.random.random_sample()
         if e <= self.epsilon:
-            action = np.random.randint(0, self.action_dim - 1)
+            action = np.random.randint(0, self.action_dim)
             action_info += "  random"
         else:
             state = torch.from_numpy(np.expand_dims(state, axis=0)).cuda()

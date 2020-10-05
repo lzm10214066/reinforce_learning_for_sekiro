@@ -6,7 +6,7 @@ Created on Wed Apr  8 12:14:29 2020
 """
 import numpy as np
 import win32gui, win32ui, win32con, win32api
-
+import cv2
 
 def grab_screen(region=None):
     hwin = win32gui.GetDesktopWindow()
@@ -38,4 +38,4 @@ def grab_screen(region=None):
     win32gui.ReleaseDC(hwin, hwindc)
     win32gui.DeleteObject(bmp.GetHandle())
 
-    return img
+    return cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
